@@ -35,7 +35,7 @@ class DMap:
         self.position = position
         r, c = position
         self.dmap[r][c] = 'R'
-        self.boolean_walls = False
+        self.boolean_walls[r][c] = False
 
     def add_discoveries(self, result: tuple):
         """format: ((r, c), boolean)"""

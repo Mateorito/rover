@@ -19,21 +19,20 @@ class QueueFrontier:
         return any(node.state == state for node in self.frontier)
 
     def remove(self):
-        if self.is_empty():
-            raise Exception('empty frontier')
-        else:
+        if not self.is_empty():
             node = self.frontier[0]
             self.frontier = self.frontier[1:]
             return node
 
 
 class Nanobot:
-    def __init__(self, size, start, grid, dmap):
+    def __init__(self, size, start, grid, dmap, energy):
         self.height, self.width = size
         self.start = start
         self.raw_grid = grid.get_raw_grid()
         self.dmap = dmap
         self.goal = dmap.goal
+        self.energy = energy
 
     def neighbors(self, state):
         row, col = state
@@ -55,7 +54,7 @@ class Nanobot:
                         self.dmap.set_goal((r, c))
                         self.goal = (r, c)
                         results.append((action, (r, c)))
-                    case '.':
+                    case '.' | 'R':
                         results.append((action, (r, c)))
                         results_to_dmap.append(((r, c), False))
         self.dmap.add_discoveries(results_to_dmap)
@@ -72,7 +71,7 @@ class Nanobot:
 
         while True:
             if frontier.is_empty():
-                raise Exception('empty frontier')
+                return None
             
             node = frontier.remove()
             self.num_explored += 1
@@ -86,7 +85,8 @@ class Nanobot:
                 actions.reverse()
                 cells.reverse()
                 self.solution = (actions, cells)
-                return self.solution[0]
+                self.energy -= self.num_explored * 0.1
+                return (self.solution[0], self.energy)
 
             self.explored.add(node.state)
             for action, state in self.neighbors(node.state):
